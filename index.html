@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>William Levy Fan Membership Card Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .form-container, .preview-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .form-container {
+            flex: 1;
+            min-width: 300px;
+            max-width: 500px;
+        }
+        
+        .preview-container {
+            flex: 1;
+            min-width: 300px;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-size: 2.5rem;
+        }
+        
+        h2 {
+            color: #b21f1f;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid #fdbb2d;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1a2a6c;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            border-color: #1a2a6c;
+            outline: none;
+        }
+        
+        .file-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .file-input-label {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            border: 2px dashed #ccc;
+            transition: all 0.3s;
+        }
+        
+        .file-input-label:hover {
+            background: #e0e0e0;
+            border-color: #1a2a6c;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .signature-preview {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        .signature-box {
+            width: 45%;
+            text-align: center;
+        }
+        
+        .signature-img {
+            width: 100%;
+            height: 60px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 5px;
+            overflow: hidden;
+        }
+        
+        .signature-img img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        button {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .card-container {
+            width: 350px;
+            height: 500px;
+            perspective: 1000px;
+            margin-bottom: 15px;
+        }
+        
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s;
+            cursor: pointer;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+        }
+        
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+        
+        .card-front {
+            background: linear-gradient(135deg, #0c2461, #1e3799, #4a69bd);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .card-back {
+            background: white;
+            color: #333;
+            transform: rotateY(180deg);
+            padding: 25px;
+        }
+        
+        .card-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .card-subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .card-body {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .member-photo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            border: 3px solid white;
+            overflow: hidden;
+        }
+        
+        .member-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .member-name {
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .member-info {
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #1a2a6c;
+        }
+        
+        .barcode {
+            height: 80px;
+            background: #f5f5f5;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .barcode svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .signature {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .signature-item {
+            text-align: center;
+            width: 45%;
+        }
+        
+        .signature-rect {
+            height: 60px;
+            background: white;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .signature-rect img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .tap-hint {
+            text-align: center;
+            margin: 10px 0;
+            font-style: italic;
+            color: white;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px;
+            border-radius: 5px;
+            width: 100%;
+        }
+        
+        .instructions {
+            color: white;
+            text-align: center;
+            max-width: 800px;
+            margin: 20px auto;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .save-btn {
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            width: 200px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .form-container, .preview-container {
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>William Levy Fan Membership Card</h1>
+    
+    <div class="instructions">
+        <p>Fill in the form to generate a personalized William Levy Fan Membership Card. The card has a flip animation - tap/click to view the back. Use the "Save Card" button to download the card as an HTML file that maintains its animation when shared.</p>
+    </div>
+    
+    <div class="container">
+        <div class="form-container">
+            <h2>Fan Information</h2>
+            <form id="fanForm">
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" required placeholder="Enter full name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="dob">Date of Birth</label>
+                    <input type="date" id="dob" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="country">Country</label>
+                    <select id="country" required>
+                        <option value="">Select Country</option>
+                        <option value="United States">United States</option>
+                        <option value="Mexico">Mexico</option>
+                        <option value="Spain">Spain</option>
+                        <option value="Colombia">Colombia</option>
+                        <option value="Argentina">Argentina</option>
+                        <option value="Brazil">Brazil</option>
+                        <option value="United Kingdom">United Kingdom</option>
+                        <option value="Canada">Canada</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Fan Photo</label>
+                    <div class="file-input-group">
+                        <label for="photoUpload" class="file-input-label">Choose Fan Photo</label>
+                        <input type="file" id="photoUpload" class="file-input" accept="image/*">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Signatures</label>
+                    <div class="file-input-group">
+                        <label for="williamSignature" class="file-input-label">William Levy Signature</label>
+                        <input type="file" id="williamSignature" class="file-input" accept="image/*">
+                        
+                        <label for="managementSignature" class="file-input-label">Management Signature</label>
+                        <input type="file" id="managementSignature" class="file-input" accept="image/*">
+                    </div>
+                    
+                    <div class="signature-preview">
+                        <div class="signature-box">
+                            <div>William Levy</div>
+                            <div class="signature-img" id="williamPreview">
+                                <span>No signature</span>
+                            </div>
+                        </div>
+                        <div class="signature-box">
+                            <div>Management</div>
+                            <div class="signature-img" id="managementPreview">
+                                <span>No signature</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="button" id="generateBtn">Generate Membership Card</button>
+            </form>
+        </div>
+        
+        <div class="preview-container">
+            <h2>Card Preview</h2>
+            
+            <div class="card-container">
+                <div class="card" id="membershipCard">
+                    <div class="card-front">
+                        <div class="card-header">
+                            <div class="card-title">WILLIAM LEVY</div>
+                            <div class="card-subtitle">Official Fan Club</div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="member-photo" id="previewPhoto">👤</div>
+                            <div class="member-name" id="previewName">Fan Name</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-back">
+                        <div class="card-header">
+                            <div class="card-title">MEMBERSHIP CARD</div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="member-info">
+                                <span class="info-label">Full Name:</span>
+                                <span id="backName">Fan Name</span>
+                            </div>
+                            
+                            <div class="member-info">
+                                <span class="info-label">Date of Birth:</span>
+                                <span id="backDob">MM/DD/YYYY</span>
+                            </div>
+                            
+                            <div class="member-info">
+                                <span class="info-label">Age:</span>
+                                <span id="backAge">--</span>
+                            </div>
+                            
+                            <div class="member-info">
+                                <span class="info-label">Country:</span>
+                                <span id="backCountry">Country</span>
+                            </div>
+                            
+                            <div class="member-info">
+                                <span class="info-label">Card PIN:</span>
+                                <span id="backPin">XXXX-XXXX</span>
+                            </div>
+                            
+                            <div class="barcode" id="barcodeContainer">
+                                <!-- Barcode will be generated here -->
+                            </div>
+                            
+                            <div class="signature">
+                                <div class="signature-item">
+                                    <div>William Levy</div>
+                                    <div class="signature-rect" id="williamSignaturePreview">
+                                        <span>Signature</span>
+                                    </div>
+                                    <div style="font-size: 12px;">Signature</div>
+                                </div>
+                                <div class="signature-item">
+                                    <div>Management</div>
+                                    <div class="signature-rect" id="managementSignaturePreview">
+                                        <span>Signature</span>
+                                    </div>
+                                    <div style="font-size: 12px;">Signature</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tap-hint">Tap the card to flip and view the back</div>
+            
+            <button class="save-btn" id="saveBtn">Save Membership Card</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateBtn = document.getElementById('generateBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const membershipCard = document.getElementById('membershipCard');
+            const form = document.getElementById('fanForm');
+            const photoUpload = document.getElementById('photoUpload');
+            const williamSignature = document.getElementById('williamSignature');
+            const managementSignature = document.getElementById('managementSignature');
+            const williamPreview = document.getElementById('williamPreview');
+            const managementPreview = document.getElementById('managementPreview');
+            
+            let photoDataUrl = '';
+            let williamSignatureDataUrl = '';
+            let managementSignatureDataUrl = '';
+            
+            // Flip card on click
+            membershipCard.addEventListener('click', function() {
+                this.classList.toggle('flipped');
+            });
+            
+            // Handle photo upload
+            photoUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        photoDataUrl = event.target.result;
+                        document.getElementById('previewPhoto').innerHTML = `<img src="${photoDataUrl}" alt="Fan Photo">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Handle William Levy signature upload
+            williamSignature.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        williamSignatureDataUrl = event.target.result;
+                        williamPreview.innerHTML = `<img src="${williamSignatureDataUrl}" alt="William Levy Signature">`;
+                        document.getElementById('williamSignaturePreview').innerHTML = `<img src="${williamSignatureDataUrl}" alt="William Levy Signature">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Handle management signature upload
+            managementSignature.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        managementSignatureDataUrl = event.target.result;
+                        managementPreview.innerHTML = `<img src="${managementSignatureDataUrl}" alt="Management Signature">`;
+                        document.getElementById('managementSignaturePreview').innerHTML = `<img src="${managementSignatureDataUrl}" alt="Management Signature">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Generate card
+            generateBtn.addEventListener('click', function() {
+                const fullName = document.getElementById('fullName').value;
+                const dob = document.getElementById('dob').value;
+                const country = document.getElementById('country').value;
+                
+                if (!fullName || !dob || !country) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+                
+                // Calculate age
+                const birthDate = new Date(dob);
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+                
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+                
+                // Generate random PIN
+                const pin = generatePIN();
+                
+                // Generate barcode
+                const barcodeSvg = generateBarcode(pin);
+                
+                // Update preview
+                document.getElementById('previewName').textContent = fullName;
+                document.getElementById('backName').textContent = fullName;
+                document.getElementById('backDob').textContent = formatDate(dob);
+                document.getElementById('backAge').textContent = age;
+                document.getElementById('backCountry').textContent = country;
+                document.getElementById('backPin').textContent = pin;
+                document.getElementById('barcodeContainer').innerHTML = barcodeSvg;
+            });
+            
+            // Save card functionality
+            saveBtn.addEventListener('click', function() {
+                const fullName = document.getElementById('fullName').value;
+                
+                if (!fullName) {
+                    alert('Please generate a card first by filling the form and clicking "Generate Membership Card"');
+                    return;
+                }
+                
+                // Get the current barcode SVG
+                const barcodeSvg = document.getElementById('barcodeContainer').innerHTML;
+                
+                // Create HTML content for the saved card
+                const cardHTML = `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>William Levy Fan Membership Card - ${fullName}</title>
+                    <style>
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        }
+                        
+                        body {
+                            background: #f5f5f5;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            min-height: 100vh;
+                            padding: 20px;
+                        }
+                        
+                        .card-container {
+                            width: 350px;
+                            height: 500px;
+                            perspective: 1000px;
+                        }
+                        
+                        .card {
+                            width: 100%;
+                            height: 100%;
+                            position: relative;
+                            transform-style: preserve-3d;
+                            transition: transform 0.8s;
+                            cursor: pointer;
+                            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+                            border-radius: 15px;
+                        }
+                        
+                        .card.flipped {
+                            transform: rotateY(180deg);
+                        }
+                        
+                        .card-front, .card-back {
+                            position: absolute;
+                            width: 100%;
+                            height: 100%;
+                            backface-visibility: hidden;
+                            border-radius: 15px;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: space-between;
+                            overflow: hidden;
+                        }
+                        
+                        .card-front {
+                            background: linear-gradient(135deg, #0c2461, #1e3799, #4a69bd);
+                            color: white;
+                            padding: 30px;
+                            text-align: center;
+                        }
+                        
+                        .card-back {
+                            background: white;
+                            color: #333;
+                            transform: rotateY(180deg);
+                            padding: 25px;
+                        }
+                        
+                        .card-header {
+                            text-align: center;
+                            margin-bottom: 20px;
+                        }
+                        
+                        .card-title {
+                            font-size: 28px;
+                            font-weight: bold;
+                            margin-bottom: 5px;
+                        }
+                        
+                        .card-subtitle {
+                            font-size: 18px;
+                            opacity: 0.9;
+                        }
+                        
+                        .card-body {
+                            flex-grow: 1;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: center;
+                        }
+                        
+                        .member-photo {
+                            width: 150px;
+                            height: 150px;
+                            border-radius: 50%;
+                            margin: 0 auto 20px;
+                            background: rgba(255, 255, 255, 0.2);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 50px;
+                            border: 3px solid white;
+                            overflow: hidden;
+                        }
+                        
+                        .member-photo img {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                        }
+                        
+                        .member-name {
+                            font-size: 24px;
+                            margin-bottom: 10px;
+                            font-weight: bold;
+                        }
+                        
+                        .member-info {
+                            font-size: 16px;
+                            margin-bottom: 8px;
+                            display: flex;
+                            justify-content: space-between;
+                        }
+                        
+                        .info-label {
+                            font-weight: bold;
+                            color: #1a2a6c;
+                        }
+                        
+                        .barcode {
+                            height: 80px;
+                            background: #f5f5f5;
+                            margin: 20px 0;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            border-radius: 5px;
+                            overflow: hidden;
+                        }
+                        
+                        .barcode svg {
+                            width: 100%;
+                            height: 100%;
+                        }
+                        
+                        .signature {
+                            display: flex;
+                            justify-content: space-between;
+                            margin-top: 20px;
+                            padding-top: 15px;
+                            border-top: 1px solid #eee;
+                        }
+                        
+                        .signature-item {
+                            text-align: center;
+                            width: 45%;
+                        }
+                        
+                        .signature-rect {
+                            height: 60px;
+                            background: white;
+                            margin-bottom: 5px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            overflow: hidden;
+                        }
+                        
+                        .signature-rect img {
+                            max-width: 100%;
+                            max-height: 100%;
+                            object-fit: contain;
+                        }
+                        
+                        .tap-hint {
+                            text-align: center;
+                            margin: 10px 0;
+                            font-style: italic;
+                            color: #333;
+                            background: rgba(0, 0, 0, 0.1);
+                            padding: 8px;
+                            border-radius: 5px;
+                            width: 100%;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="card-container">
+                        <div class="card" id="membershipCard">
+                            <div class="card-front">
+                                <div class="card-header">
+                                    <div class="card-title">WILLIAM LEVY</div>
+                                    <div class="card-subtitle">Official Fan Club</div>
+                                </div>
+                                
+                                <div class="card-body">
+                                    <div class="member-photo">${document.getElementById('previewPhoto').innerHTML}</div>
+                                    <div class="member-name">${document.getElementById('previewName').textContent}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-back">
+                                <div class="card-header">
+                                    <div class="card-title">MEMBERSHIP CARD</div>
+                                </div>
+                                
+                                <div class="card-body">
+                                    <div class="member-info">
+                                        <span class="info-label">Full Name:</span>
+                                        <span>${document.getElementById('backName').textContent}</span>
+                                    </div>
+                                    
+                                    <div class="member-info">
+                                        <span class="info-label">Date of Birth:</span>
+                                        <span>${document.getElementById('backDob').textContent}</span>
+                                    </div>
+                                    
+                                    <div class="member-info">
+                                        <span class="info-label">Age:</span>
+                                        <span>${document.getElementById('backAge').textContent}</span>
+                                    </div>
+                                    
+                                    <div class="member-info">
+                                        <span class="info-label">Country:</span>
+                                        <span>${document.getElementById('backCountry').textContent}</span>
+                                    </div>
+                                    
+                                    <div class="member-info">
+                                        <span class="info-label">Card PIN:</span>
+                                        <span>${document.getElementById('backPin').textContent}</span>
+                                    </div>
+                                    
+                                    <div class="barcode">
+                                        ${barcodeSvg}
+                                    </div>
+                                    
+                                    <div class="signature">
+                                        <div class="signature-item">
+                                            <div>William Levy</div>
+                                            <div class="signature-rect">${document.getElementById('williamSignaturePreview').innerHTML}</div>
+                                            <div style="font-size: 12px;">Signature</div>
+                                        </div>
+                                        <div class="signature-item">
+                                            <div>Management</div>
+                                            <div class="signature-rect">${document.getElementById('managementSignaturePreview').innerHTML}</div>
+                                            <div style="font-size: 12px;">Signature</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tap-hint">Tap the card to flip and view the back</div>
+                    
+                    <script>
+                        document.getElementById('membershipCard').addEventListener('click', function() {
+                            this.classList.toggle('flipped');
+                        });
+                    <\/script>
+                </body>
+                </html>
+                `;
+                
+                // Create and download the file
+                const blob = new Blob([cardHTML], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `William_Levy_Membership_Card_${fullName.replace(/\s+/g, '_')}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+            
+            // Helper function to format date
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+            
+            // Helper function to generate a random PIN
+            function generatePIN() {
+                return Math.random().toString(36).substring(2, 6).toUpperCase() + 
+                       '-' + 
+                       Math.random().toString(36).substring(2, 6).toUpperCase();
+            }
+            
+            // Helper function to generate a simple barcode
+            function generateBarcode(pin) {
+                // Create a simple barcode pattern based on the PIN
+                const encodedPin = encodePIN(pin);
+                let bars = '';
+                
+                for (let i = 0; i < encodedPin.length; i++) {
+                    const barWidth = parseInt(encodedPin[i]) + 1;
+                    bars += `<rect x="${i * 10}" y="0" width="${barWidth}" height="80" fill="#000" />`;
+                }
+                
+                return `<svg viewBox="0 0 ${encodedPin.length * 10} 80" xmlns="http://www.w3.org/2000/svg">${bars}</svg>`;
+            }
+            
+            // Helper function to encode PIN for barcode
+            function encodePIN(pin) {
+                // Simple encoding - convert each character to a number and take modulo 5
+                let encoded = '';
+                for (let i = 0; i < pin.length; i++) {
+                    const charCode = pin.charCodeAt(i);
+                    encoded += (charCode % 5).toString();
+                }
+                return encoded;
+            }
+        });
+    </script>
+</body>
+</html>
